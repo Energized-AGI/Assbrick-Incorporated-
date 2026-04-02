@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assbrick Incorporated — Wholesalers Of Various Merchandise </title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/web3@latest/dist/web3.min.js"></script>
+    <script src="https://unstoppabledomains.github.io/resolution/v1/index.js"></script>
+    <style>
+        :root { --accent: #00ff9d; --bg: #0d001a; --card: #1a0033; }
+        body { margin:0; background:var(--bg); color:#fff; font-family:'Roboto Mono',monospace; overflow-x:hidden; }
+        .glitch { font-family:'Orbitron',sans-serif; font-size:4rem; text-align:center; padding:60px 20px; background:linear-gradient(45deg,#0d001a,#001133); 
+                 text-shadow:0 0 20px var(--accent); animation:glitch 3s infinite; }
+        @keyframes glitch { 0%,100%{text-shadow:0 0 20px var(--accent);} 20%{text-shadow:5px 5px 0 #ff00ff,-5px -5px 0 #00ffff;} }
+        .container { max-width:1400px; margin:0 auto; padding:20px; }
+        .wallet-btn { background:var(--accent); color:#000; padding:15px 30px; border:none; border-radius:50px; font-weight:bold; cursor:pointer; 
+                      box-shadow:0 0 30px rgba(0,255,157,0.5); transition:0.3s; }
+        .wallet-btn:hover { transform:scale(1.05); box-shadow:0 0 50px rgba(0,255,157,0.8); }
+        .factory { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:25px; margin-top:40px; }
+        .agent-card { background:var(--card); border:2px solid var(--accent); border-radius:15px; padding:20px; text-align:center; 
+                      transition:0.4s; cursor:pointer; position:relative; overflow:hidden; }
+        .agent-card:hover { transform:translateY(-15px); box-shadow:0 0 40px rgba(0,255,157,0.6); }
+        .agent-card::before { content:attr(data-sub); position:absolute; top:10px; right:10px; font-size:0.8rem; opacity:0.6; }
+        .new-agent { border:3px dashed var(--accent); background:transparent; }
+        .new-agent:hover { background:rgba(0,255,157,0.1); }
+        #chat-area { margin-top:50px; background:#000; border:1px solid var(--accent); border-radius:15px; padding:20px; display:none; }
+        #messages { height:400px; overflow-y:auto; margin-bottom:20px; padding:15px; background:#111; border-radius:10px; }
+        input, button { padding:15px; border-radius:10px; margin:5px; font-family:inherit; }
+        input { background:#222; border:1px solid var(--accent); color:#fff; width:70%; }
+        button { background:var(--accent); color:#000; border:none; cursor:pointer; width:25%; font-weight:bold; }
+        .status { text-align:center; margin:20px; font-size:1.2rem; }
+        .live { color:var(--accent); animation:pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+    </style>
+</head>
+<body>
+
+<div class="glitch">Assbrick Incorporated</div>
+<div class="container">
+    <p style="text-align:center; font-size:1.4rem; opacity:0.8;">
+        Free Cost Price Makosha • By Siyabonga Hardware. Dial 068 364 3101
+    <p style="text-align:center; font-size:1.4rem; opacity:0.8;">
+        27 Main Rd, Kranskop, 3268 - Thuliwe Or Thulani For Free First Timers
+    </p>
+    <center><button class="wallet-btn" onclick="connect()">Get Free Ass → Assbrick Holesalers </button></center>
+    <div class="status" id="status">Wallet not connected</div>
+
+    <div class="factory" id="agentFactory">
+        <!-- All your agents auto-loaded here -->
+    </div>
+
+    <div id="chat-area">
+        <h2 id="active-agent">Select or spawn an agent</h2>
+        <div id="messages"></div>
+        <input type="text" id="userInput" placeholder="Ask your agent anything..." onkeypress="if(event.key==='Enter') send()">
+        <button onclick="send()">SEND</button>
+    </div>
+</div>
+
+<script>
+// Full agent list — every single one you own
+const agents = [
+    
+    // ← Add the rest anytime, it just works
+    {name:"+ Spawn New Agent", sub:"", desc:"Create anything • Instant deploy", new:true}
+];
+
+let currentAgent = null;
+
+function renderFactory() {
+    const factory = document.getElementById('agentFactory');
+    factory.innerHTML = '';
+    agents.forEach(a => {
+        const card = document.createElement('div');
+        card.className = a.new ? 'agent-card new-agent' : 'agent-card';
+        card.setAttribute('data-sub', a.sub ? a.sub+'.paradigm.0g' : '');
+        card.innerHTML = `
+            <h3>${a.name}</h3>
+            <p>${a.desc}</p>
+            \( {a.sub ? `<br><small>→ \){a.sub}.paradigm.0g</small>` : '<br><b>Click to create any name</b>'}
+        `;
+        card.onclick = () => a.new ? promptNew() : activateAgent(a);
+        factory.appendChild(card);
+    });
+}
+
+function activateAgent(agent) {
+    currentAgent = agent;
+    document.getElementById('active-agent').textContent = `\( {agent.name} — \){agent.sub}.paradigm.0g`;
+    document.getElementById('chat-area').style.display = 'block';
+    document.getElementById('messages').innerHTML = `<p style="color:#00ff9d;"><b>${agent.name} online.</b> Ask me anything, bru.</p>`;
+}
+
+function promptNew() {
+    const name = prompt("Spawn new agent — enter any name (e.g. WeedAGI, ForexAGI, etc.):");
+    if(name){
+        const sub = name.toLowerCase().replace(/[^a-z0-9]/g,'');
+        const newAgent = {name:name, sub:sub, desc:"Custom agent • Just born"};
+        agents.splice(agents.length-1,0,newAgent); // insert before "+ Spawn"
+        renderFactory();
+        activateAgent(newAgent);
+    }
+}
+
+function send() {
+    const input = document.getElementById('userInput');
+    const msg = input.value.trim();
+    if(!msg || !currentAgent) return;
+    document.getElementById('messages').innerHTML += `<p><b>You:</b> ${msg}</p>`;
+    // Mock response — replace with real 0G Compute call later
+    setTimeout(() => {
+        document.getElementById('messages').innerHTML += `<p style="color:#00ff9d;"><b>${currentAgent.name}:</b> Working... Output minting as iNFT on 0G → <a href="#" style="color:#ff00ff;">view on-chain</a></p>`;
+        document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+    }, 1000);
+    input.value = '';
+}
+
+async function connect() {
+    if(window.ethereum){
+        await ethereum.request({method:'eth_requestAccounts'});
+        document.getElementById('status').innerHTML = '<span class="live">paradigm.0g factory LIVE • Wallet connected</span>';
+        renderFactory();
+    } else {
+        alert("Install MetaMask or any wallet → then come back, king");
+    }
+}
+
+// Auto-start
+renderFactory();
+</script>
+
+</body>
+</html>
